@@ -130,7 +130,7 @@ def check_command(module, commandline):
                 'mount': 'mount', 'rpm': 'yum, dnf or zypper', 'yum': 'yum', 'apt-get': 'apt',
                 'tar': 'unarchive', 'unzip': 'unarchive', 'sed': 'replace, lineinfile or template',
                 'dnf': 'dnf', 'zypper': 'zypper'}
-    become = ['sudo', 'su', 'pbrun', 'pfexec', 'runas', 'pmrun']
+    become = ['sudo', 'su', 'pbrun', 'pfexec', 'runas', 'pmrun', 'pimsu']
     command = os.path.basename(commandline.split()[0])
 
     disable_suffix = "If you need to use command because {mod} is insufficient you can add" \

@@ -119,6 +119,8 @@ def test_play_context_make_become_cmd(parser):
     ksu_exe = 'ksu'
     ksu_flags = ''
     dzdo_exe = 'dzdo'
+    pimsu_exe = 'pimsu'
+    pimsu_flags = ''
 
     cmd = play_context.make_become_cmd(cmd=default_cmd, executable=default_exe)
     assert cmd == default_cmd
@@ -175,3 +177,15 @@ def test_play_context_make_become_cmd(parser):
     assert (cmd == """%s -p %s -u %s %s -c 'echo %s; %s'""" % (dzdo_exe, shlex_quote(play_context.prompt),
                                                                play_context.become_user, default_exe,
                                                                play_context.success_key, default_cmd))
+
+    play_context.become_method = 'pimsu'
+    play_context.become_user = 'root'
+    cmd = play_context.make_become_cmd(cmd=default_cmd, executable="/bin/bash")
+    assert (cmd == """%s %s %s""" % (pimsu_exe,pimsu_flags, default_cmd))
+
+    play_context.become_method = 'pimsu'
+    play_context.become_user = 'notroot'
+    pimsu_flags = " -u %s" % (play_context.become_user)
+    cmd = play_context.make_become_cmd(cmd=default_cmd, executable="/bin/bash")
+    assert (cmd == """%s %s %s""" % (pimsu_exe,pimsu_flags, default_cmd))
+
