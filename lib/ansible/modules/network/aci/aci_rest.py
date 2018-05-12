@@ -26,8 +26,8 @@ notes:
   This is a known APIC problem and has been reported to the vendor. A workaround for this issue exists.
   More information in :ref:`the ACI documentation <aci_guide_known_issues>`.
 - XML payloads require the C(lxml) and C(xmljson) python libraries. For JSON payloads nothing special is needed.
-- More information regarding the Cisco APIC REST API is available from
-  U(http://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/2-x/rest_cfg/2_1_x/b_Cisco_APIC_REST_API_Configuration_Guide.html).
+- More information regarding the APIC REST API is available from
+  L(the Cisco APIC REST API Configuration Guide,http://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/2-x/rest_cfg/2_1_x/b_Cisco_APIC_REST_API_Configuration_Guide.html).  # NOQA
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.4'
@@ -42,7 +42,6 @@ options:
     - Using C(delete) is typically used for deleting objects.
     - Using C(get) is typically used for querying objects.
     - Using C(post) is typically used for modifying objects.
-    required: yes
     default: get
     choices: [ delete, get, post ]
     aliases: [ action ]
@@ -55,11 +54,15 @@ options:
   content:
     description:
     - When used instead of C(src), sets the payload of the API request directly.
-    - This may be convenient to template simple requests, for anything complex use the M(template) module.
+    - This may be convenient to template simple requests.
+    - For anything complex use the C(template) lookup plugin (see examples)
+      or the M(template) module with parameter C(src).
   src:
     description:
     - Name of the absolute path of the filname that includes the body
-      of the http request being sent to the ACI fabric.
+      of the HTTP request being sent to the ACI fabric.
+    - If you require a templated payload, use the C(content) parameter
+      together with the C(template) lookup plugin, or use M(template).
     aliases: [ config_file ]
 extends_documentation_fragment: aci
 '''
@@ -73,6 +76,16 @@ EXAMPLES = r'''
     method: post
     path: /api/mo/uni.xml
     src: /home/cisco/ansible/aci/configs/aci_config.xml
+  delegate_to: localhost
+
+- name: Add a tenant from a templated payload file from templates/
+  aci_rest:
+    host: apic
+    username: admin
+    private_key: pki/admin.key
+    method: post
+    path: /api/mo/uni.xml
+    content: "{{ lookup('template', 'aci/tenant.xml.j2') }}"
   delegate_to: localhost
 
 - name: Add a tenant using inline YAML
@@ -307,7 +320,6 @@ def main():
         method=dict(type='str', default='get', choices=['delete', 'get', 'post'], aliases=['action']),
         src=dict(type='path', aliases=['config_file']),
         content=dict(type='raw'),
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

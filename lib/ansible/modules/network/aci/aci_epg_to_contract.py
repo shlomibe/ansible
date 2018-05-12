@@ -19,8 +19,8 @@ description:
 notes:
 - The C(tenant), C(app_profile), C(EPG), and C(Contract) used must exist before using this module in your playbook.
   The M(aci_tenant), M(aci_ap), M(aci_epg), and M(aci_contract) modules can be used for this.
-- More information about the internal APIC classes B(fv:RsCons) and B(fv:RsProv) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC classes B(fv:RsCons) and B(fv:RsProv) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Jacob McGill (@jmcgill298)
 version_added: '2.4'
@@ -37,7 +37,7 @@ options:
     description:
     - Determines if the EPG should Provide or Consume the Contract.
     required: yes
-    choices: [ consumer, proivder ]
+    choices: [ consumer, provider ]
   epg:
     description:
     - The name of the end point group.
@@ -45,15 +45,13 @@ options:
   priority:
     description:
     - QoS class.
-    - The APIC defaults new EPG to Contract bindings to C(unspecified).
+    - The APIC defaults to C(unspecified) when unset during creation.
     choices: [ level1, level2, level3, unspecified ]
-    default: unspecified
   provider_match:
     description:
     - The matching algorithm for Provided Contracts.
-    - The APIC defaults new EPG to Provided Contracts to C(at_least_one).
+    - The APIC defaults to C(at_least_one) when unset during creation.
     choices: [ all, at_least_one, at_most_one, none ]
-    default: at_least_one
   state:
     description:
     - Use C(present) or C(absent) for adding or removing.
@@ -236,8 +234,6 @@ def main():
         provider_match=dict(type='str', choices=['all', 'at_least_one', 'at_most_one', 'none']),
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
         tenant=dict(type='str', aliases=['tenant_name']),  # Not required for querying all objects
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

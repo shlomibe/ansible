@@ -11,6 +11,11 @@ else
 CPUS ?= $(shell nproc)
 endif
 
+# Sets the build output directory if it's not already specified
+ifndef BUILDDIR
+	BUILDDIR = _build
+endif
+
 MODULE_ARGS=
 ifdef MODULES
 	MODULE_ARGS = -l $(MODULES)
@@ -21,7 +26,7 @@ ifdef PLUGINS
 	PLUGIN_ARGS = -l $(PLUGINS)
 endif
 
-DOC_PLUGINS ?= cache callback connection inventory lookup strategy vars
+DOC_PLUGINS ?= cache callback connection inventory lookup shell strategy vars
 
 assertrst:
 ifndef rst
@@ -44,6 +49,9 @@ webdocs: docs
 
 #TODO: leaving htmlout removal for those having older versions, should eventually be removed also
 clean:
+	@echo "Cleaning $(BUILDDIR)"
+	-rm -rf $(BUILDDIR)/doctrees
+	-rm -rf $(BUILDDIR)/html
 	-rm -rf htmlout
 	-rm -rf module_docs
 	-rm -rf _build
@@ -103,5 +111,5 @@ epub:
 	(CPUS=$(CPUS) make -f Makefile.sphinx epub)
 
 htmlsingle: assertrst
-	sphinx-build -j $(CPUS) -b html -d _build/doctrees ./rst _build/html rst/$(rst)
-	@echo "Output is in _build/html/$(rst:.rst=.html)"
+	sphinx-build -j $(CPUS) -b html -d $(BUILDDIR)/doctrees ./rst $(BUILDDIR)/html rst/$(rst)
+	@echo "Output is in $(BUILDDIR)/html/$(rst:.rst=.html)"

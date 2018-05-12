@@ -101,23 +101,17 @@ class KubernetesAnsibleModule(AnsibleModule):
 
     def __init__(self, *args, **kwargs):
 
-        if not HAS_K8S_MODULE_HELPER:
-            raise Exception(
-                "This module requires the OpenShift Python client. Try `pip install openshift`"
-            )
-
-        if not HAS_YAML:
-            raise Exception(
-                "This module requires PyYAML. Try `pip install PyYAML`"
-            )
-
-        if not HAS_STRING_UTILS:
-            raise Exception(
-                "This module requires Python string utils. Try `pip install python-string-utils`"
-            )
-
         kwargs['argument_spec'] = self.argspec
         AnsibleModule.__init__(self, *args, **kwargs)
+
+        if not HAS_K8S_MODULE_HELPER:
+            self.fail_json(msg="This module requires the OpenShift Python client. Try `pip install openshift`")
+
+        if not HAS_YAML:
+            self.fail_json(msg="This module requires PyYAML. Try `pip install PyYAML`")
+
+        if not HAS_STRING_UTILS:
+            self.fail_json(msg="This module requires Python string utils. Try `pip install python-string-utils`")
 
     @property
     def argspec(self):
@@ -192,7 +186,7 @@ class KubernetesAnsibleModule(AnsibleModule):
             elif key in self.helper.argspec and value is not None:
                 parameters[key] = value
             elif isinstance(value, dict):
-                self._add_parameter(value, [key], parameters)
+                self._add_parameter(value, [to_snake(key)], parameters)
         return parameters
 
     def _add_parameter(self, request, path, parameters):
@@ -200,12 +194,12 @@ class KubernetesAnsibleModule(AnsibleModule):
             if path:
                 param_name = '_'.join(path + [to_snake(key)])
             else:
-                param_name = self.helper.attribute_to_snake(key)
+                param_name = to_snake(key)
             if param_name in self.helper.argspec and value is not None:
                 parameters[param_name] = value
             elif isinstance(value, dict):
                 continue_path = copy.copy(path) if path else []
-                continue_path.append(self.helper.attribute_to_snake(key))
+                continue_path.append(to_snake(key))
                 self._add_parameter(value, continue_path, parameters)
             else:
                 self.fail_json(

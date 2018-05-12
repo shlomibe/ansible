@@ -61,8 +61,6 @@ options:
         description:
             - Name of the kickstart image file on flash.
               (Not required on all Nexus platforms)
-        required: false
-        default: null
     issu:
         version_added: "2.5"
         description:
@@ -73,7 +71,6 @@ options:
             - Selecting 'desired' means that upgrades will use ISSU if possible
               but will fall back to disruptive upgrade if needed.
             - Selecting 'no' means do not use ISSU. Forced disruptive.
-        required: false
         choices: ['required','desired', 'yes', 'no']
         default: 'no'
 '''
@@ -383,6 +380,7 @@ def build_install_cmd_set(issu, image, kick, type):
     else:
         commands.append(
             '%s system %s kickstart %s' % (rootcmd, image, kick))
+
     return commands
 
 
@@ -452,7 +450,7 @@ def check_mode_nextgen(module, issu, image, kick=None):
         # The system may be busy from the previous call to check_mode so loop
         # until it's done.
         data = check_install_in_progress(module, commands, opts)
-    if re.search(r'No install all data found', data['raw']):
+    if data['server_error']:
         data['error'] = True
     return data
 

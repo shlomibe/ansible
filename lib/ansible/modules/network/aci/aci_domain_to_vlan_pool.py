@@ -20,8 +20,8 @@ description:
 notes:
 - The C(domain) and C(vlan_pool) parameters should exist before using this module.
   The M(aci_domain) and M(aci_vlan_pool) can be used for these.
-- More information about the internal APIC class B(infra:RsVlanNs) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(infra:RsVlanNs) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.5'
@@ -302,7 +302,7 @@ def main():
     elif domain_type == 'vmm':
         domain_class = 'vmmDomP'
         domain_mo = 'uni/vmmp-{0}/dom-{1}'.format(VM_PROVIDER_MAPPING[vm_provider], domain)
-        domain_rn = 'dom-{0}'.format(domain)
+        domain_rn = 'vmmp-{0}/dom-{1}'.format(VM_PROVIDER_MAPPING[vm_provider], domain)
 
     # Ensure that querying all objects works when only domain_type is provided
     if domain is None:

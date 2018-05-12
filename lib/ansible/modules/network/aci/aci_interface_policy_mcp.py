@@ -17,8 +17,8 @@ short_description: Manage MCP interface policies (mcp:IfPol)
 description:
 - Manage MCP interface policies on Cisco ACI fabrics.
 notes:
-- More information about the internal APIC class B(mcp:IfPol) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(mcp:IfPol) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.4'
@@ -35,8 +35,8 @@ options:
   admin_state:
     description:
     - Enable or disable admin state.
+    - The APIC defaults to C(enable) when unset during creation.
     choices: [ disable, enable ]
-    default: enable
   state:
     description:
     - Use C(present) or C(absent) for adding or removing.
@@ -173,8 +173,6 @@ def main():
         description=dict(type='str', aliases=['descr']),
         admin_state=dict(type='raw'),  # Turn into a boolean in v2.9
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

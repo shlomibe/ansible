@@ -20,8 +20,8 @@ description:
 notes:
 - This module is to be used with M(aci_switch_policy_leaf_profile)
   One first creates a leaf profile (infra:NodeP) and then creates an associated selector (infra:LeafS),
-- More information about the internal APIC classes B(infra:LeafS), B(infra:NodeBlk) and B(infra:RsAccNodePGrp) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC classes B(infra:LeafS), B(infra:NodeBlk) and B(infra:RsAccNodePGrp) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Bruno Calogero (@brunocalogero)
 version_added: '2.5'
@@ -227,6 +227,7 @@ def main():
         'leaf': dict(type='str', aliases=['name', 'leaf_name', 'leaf_profile_leaf_name', 'leaf_selector_name']),  # Not required for querying all objects
         'leaf_node_blk': dict(type='str', aliases=['leaf_node_blk_name', 'node_blk_name']),
         'leaf_node_blk_description': dict(type='str'),
+        # NOTE: Keyword 'from' is a reserved word in python, so we need it as a string
         'from': dict(type='int', aliases=['node_blk_range_from', 'from_range', 'range_from']),
         'to': dict(type='int', aliases=['node_blk_range_to', 'to_range', 'range_to']),
         'policy_group': dict(type='str', aliases=['policy_group_name']),

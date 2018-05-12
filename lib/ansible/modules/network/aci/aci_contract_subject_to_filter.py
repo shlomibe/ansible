@@ -19,8 +19,8 @@ description:
 notes:
 - The C(tenant), C(contract), C(subject), and C(filter_name) must exist before using this module in your playbook.
 - The M(aci_tenant), M(aci_contract), M(aci_contract_subject), and M(aci_filter) modules can be used for these.
-- More information about the internal APIC class B(vz:RsSubjFiltAtt) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(vz:RsSubjFiltAtt) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Jacob McGill (@jmcgill298)
 version_added: '2.4'
@@ -36,10 +36,9 @@ options:
   log:
     description:
     - Determines if the binding should be set to log.
-    - The APIC defaults new Subject to Filter bindings to C(none).
+    - The APIC defaults to C(none) when unset during creation.
     choices: [ log, none ]
     aliases: [ directive ]
-    default: none
   subject:
     description:
     - The name of the Contract Subject.
@@ -223,8 +222,6 @@ def main():
         subject=dict(type='str', aliases=['contract_subject', 'subject_name']),  # Not required for querying all objects
         tenant=dict(type='str', aliases=['tenant_name']),  # Not required for querying all objects
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

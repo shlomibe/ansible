@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 # Copyright: (c) 2015, Joseph Callen <jcallen () csc.com>
 # Copyright: (c) 2017-18, Ansible Project
 # Copyright: (c) 2017-18, Abhijeet Kasurde <akasurde@redhat.com>
@@ -8,13 +9,11 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
     'supported_by': 'community'
 }
-
 
 DOCUMENTATION = '''
 ---
@@ -189,7 +188,13 @@ class PyVmomiHelper(PyVmomi):
         self.vlan_id = self.params['vlan_id']
 
         self.esxi_host_name = self.params['esxi_hostname']
-        self.esxi_host_obj = self.get_all_host_objs(esxi_host_name=self.esxi_host_name)[0]
+
+        hosts = self.get_all_host_objs(esxi_host_name=self.esxi_host_name)
+        if hosts:
+            self.esxi_host_obj = hosts[0]
+        else:
+            self.module.fail_json("Failed to get details of ESXi server."
+                                  " Please specify esxi_hostname.")
 
         self.port_group_obj = self.get_port_group_by_name(host_system=self.esxi_host_obj, portgroup_name=self.port_group_name)
         if not self.port_group_obj:

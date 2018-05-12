@@ -331,7 +331,7 @@ class MockResponse(object):
         return self.body
 
 
-def mock_call(calls, url, data=None, headers=None, method=None):
+def mock_call(calls, url, timeout, data=None, headers=None, method=None):
     result = calls[0]
     del calls[0]
 
@@ -366,7 +366,7 @@ class TestJsonRpc(unittest.TestCase):
             MockResponse('exists', {'path': '/not-exists'}, 200, '{"result": {"exists": false}}')
         ]
         open_url_mock.side_effect = lambda *args, **kwargs: mock_call(calls, *args, **kwargs)
-        client = nso.JsonRpc('http://localhost:8080/jsonrpc')
+        client = nso.JsonRpc('http://localhost:8080/jsonrpc', 10)
         self.assertEquals(True, client.exists('/exists'))
         self.assertEquals(False, client.exists('/not-exists'))
 
@@ -379,7 +379,7 @@ class TestJsonRpc(unittest.TestCase):
             MockResponse('exists', {'path': '/list{missing-parent}/list{child}'}, 200, '{"error":{"type":"data.not_found"}}')
         ]
         open_url_mock.side_effect = lambda *args, **kwargs: mock_call(calls, *args, **kwargs)
-        client = nso.JsonRpc('http://localhost:8080/jsonrpc')
+        client = nso.JsonRpc('http://localhost:8080/jsonrpc', 10)
         self.assertEquals(False, client.exists('/list{missing-parent}/list{child}'))
 
         self.assertEqual(0, len(calls))
@@ -400,7 +400,7 @@ class TestValueBuilder(unittest.TestCase):
             SCHEMA_DATA['/an:id-name-leaf'])
         schema = schema_data['data']
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, 'ansible-nso:id-two', schema)
         self.assertEquals(1, len(vb.values))
         value = vb.values[0]
@@ -425,7 +425,7 @@ class TestValueBuilder(unittest.TestCase):
             SCHEMA_DATA['/an:id-name-values/id-name-value'])
         schema = schema_data['data']
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, 'id-name-value', [{'name': 'ansible-nso:id-one', 'value': '1'}], schema)
         self.assertEquals(1, len(vb.values))
         value = vb.values[0]
@@ -450,7 +450,7 @@ class TestValueBuilder(unittest.TestCase):
             SCHEMA_DATA['/test:test'])
         schema = schema_data['data']
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, [{'name': 'direct', 'direct-child': 'direct-value'},
                                 {'name': 'nested', 'nested-child': 'nested-value'}], schema)
         self.assertEquals(2, len(vb.values))
@@ -480,7 +480,7 @@ class TestValueBuilder(unittest.TestCase):
             SCHEMA_DATA['/test:test'])
         schema = schema_data['data']
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, {'device-list': ['one', 'two']}, schema)
         self.assertEquals(1, len(vb.values))
         value = vb.values[0]
@@ -503,7 +503,7 @@ class TestValueBuilder(unittest.TestCase):
             SCHEMA_DATA['/test:test'])
         schema = schema_data['data']
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, {'device-list': ['one', 'two']}, schema)
         self.assertEquals(3, len(vb.values))
         value = vb.values[0]
@@ -537,7 +537,7 @@ class TestValueBuilder(unittest.TestCase):
             'c': '3',
         }
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, values, schema)
         self.assertEquals(3, len(vb.values))
         value = vb.values[0]
@@ -570,7 +570,7 @@ class TestValueBuilder(unittest.TestCase):
             'b': '2'
         }
 
-        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc'))
+        vb = nso.ValueBuilder(nso.JsonRpc('http://localhost:8080/jsonrpc', 10))
         vb.build(parent, None, values, schema)
         self.assertEquals(2, len(vb.values))
         value = vb.values[0]
@@ -600,3 +600,48 @@ class TestVerifyVersion(unittest.TestCase):
         self.assertFalse(nso.verify_version_str('4.4.1', [(4, 6), (4, 5, 1)]))
         self.assertFalse(nso.verify_version_str('4.4.1.2', [(4, 6), (4, 5, 1)]))
         self.assertFalse(nso.verify_version_str('4.5.0', [(4, 6), (4, 5, 1)]))
+
+
+class TestValueSort(unittest.TestCase):
+    def test_sort_parent_depend(self):
+        values = [
+            nso.ValueBuilder.Value('/test/list{entry}', '/test/list', 'CREATE', ['']),
+            nso.ValueBuilder.Value('/test/list{entry}/description', '/test/list/description', 'TEST', ['']),
+            nso.ValueBuilder.Value('/test/entry', '/test/entry', 'VALUE', ['/test/list', '/test/list/name'])
+        ]
+
+        result = [v.path for v in nso.ValueBuilder.sort_values(values)]
+
+        self.assertEquals(['/test/list{entry}', '/test/entry', '/test/list{entry}/description'], result)
+
+    def test_sort_break_direct_cycle(self):
+        values = [
+            nso.ValueBuilder.Value('/test/a', '/test/a', 'VALUE', ['/test/c']),
+            nso.ValueBuilder.Value('/test/b', '/test/b', 'VALUE', ['/test/a']),
+            nso.ValueBuilder.Value('/test/c', '/test/c', 'VALUE', ['/test/a'])
+        ]
+
+        result = [v.path for v in nso.ValueBuilder.sort_values(values)]
+
+        self.assertEquals(['/test/a', '/test/b', '/test/c'], result)
+
+    def test_sort_break_indirect_cycle(self):
+        values = [
+            nso.ValueBuilder.Value('/test/c', '/test/c', 'VALUE', ['/test/a']),
+            nso.ValueBuilder.Value('/test/a', '/test/a', 'VALUE', ['/test/b']),
+            nso.ValueBuilder.Value('/test/b', '/test/b', 'VALUE', ['/test/c'])
+        ]
+
+        result = [v.path for v in nso.ValueBuilder.sort_values(values)]
+
+        self.assertEquals(['/test/a', '/test/c', '/test/b'], result)
+
+    def test_sort_depend_on_self(self):
+        values = [
+            nso.ValueBuilder.Value('/test/a', '/test/a', 'VALUE', ['/test/a']),
+            nso.ValueBuilder.Value('/test/b', '/test/b', 'VALUE', [])
+        ]
+
+        result = [v.path for v in nso.ValueBuilder.sort_values(values)]
+
+        self.assertEqual(['/test/a', '/test/b'], result)

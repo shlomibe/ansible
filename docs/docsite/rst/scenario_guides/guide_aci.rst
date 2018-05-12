@@ -51,7 +51,7 @@ Using the ACI modules
 ---------------------
 The Ansible ACI modules provide a user-friendly interface to managing your ACI environment using Ansible playbooks.
 
-For instance ensuring that a specific tenant exists, is done using the following Ansible task:
+For instance ensuring that a specific tenant exists, is done using the following Ansible task using module `aci_tenant <aci_tenant_module>`:
 
 .. code-block:: yaml
 
@@ -65,7 +65,38 @@ For instance ensuring that a specific tenant exists, is done using the following
         description: Customer XYZ
         state: present
 
-A complete list of existing ACI modules is available for `the latest stable release <http://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#aci>`_ as well as `the current development version <http://docs.ansible.com/ansible/devel/modules/list_of_network_modules.html#aci>`_.
+A complete list of existing ACI modules is available for the latest stable release on the :ref:`list of network modules <network_modules>`. You can also view the `current development version <http://docs.ansible.com/ansible/devel/modules/list_of_network_modules.html#aci>`_.
+
+Querying ACI configuration
+..........................
+
+A module can also be used to query a specific object.
+
+.. code-block:: yaml
+
+    - name: Query tenant customer-xyz
+      aci_tenant:
+        host: my-apic-1
+        username: admin
+        password: my-password
+    
+        tenant: customer-xyz
+        state: query
+
+Or query all objects.
+
+.. code-block:: yaml
+
+    - name: Query all tenants
+      aci_tenant:
+        host: my-apic-1
+        username: admin
+        password: my-password
+    
+        state: query
+      register: all_tenants
+
+After registering the return values of the `aci_tenant <aci_tenant_module>` task as shown above, you can access all tenant information from variable ``all_tenants``.
 
 
 Common parameters
@@ -125,7 +156,7 @@ Return values
 The following values are always returned:
 
     current
-        The resulting state of the managed object.
+        The resulting state of the managed object, or results of your query.
 
 The following values are returned when ``output_level: info``:
 
@@ -173,7 +204,7 @@ ACI authentication
 
 Password-based authentication
 .............................
-If you want to logon using a username and password, you can use the following parameters with your ACI modules:
+If you want to log on using a username and password, you can use the following parameters with your ACI modules:
 
 .. code-block:: yaml
 
@@ -208,16 +239,16 @@ Configure your local user
 ,,,,,,,,,,,,,,,,,,,,,,,,,
 Perform the following steps:
 
-- Add the X.509 certificate to your ACI AAA local user at **ADMIN > AAA**
-- Click **AAA Authentication**
-- Check that in the **Authentication** field the **Realm** field displays **Local**
-- Expand **Security Management > Local Users**
-- Click the name of the user you want to add a certificate to, in the **User Certificates** area
-- Click the **+** sign and in the **Create X509 Certificate** enter a certificate name in the **Name** field
+- Add the X.509 certificate to your ACI AAA local user at :guilabel:`ADMIN` » :guilabel:`AAA`
+- Click :guilabel:`AAA Authentication`
+- Check that in the :guilabel:`Authentication` field the :guilabel:`Realm` field displays :guilabel:`Local`
+- Expand :guilabel:`Security Management` » :guilabel:`Local Users`
+- Click the name of the user you want to add a certificate to, in the :guilabel:`User Certificates` area
+- Click the :guilabel:`+` sign and in the :guilabel:`Create X509 Certificate` enter a certificate name in the :guilabel:`Name` field
 
   * If you use the basename of your private key here, you don't need to enter ``certificate_name`` in Ansible
 
-- Copy and paste your X.509 certificate in the **Data** field.
+- Copy and paste your X.509 certificate in the :guilabel:`Data` field.
 
 You can automate this by using the following Ansible task:
 
@@ -259,17 +290,17 @@ Using ACI REST with Ansible
 ---------------------------
 While already a lot of ACI modules exists in the Ansible distribution, and the most common actions can be performed with these existing modules, there's always something that may not be possible with off-the-shelf modules.
 
-The :ref:`aci_rest <aci_rest>` module provides you with direct access to the APIC REST API and enables you to perform any task not already covered by the existing modules. This may seem like a complex undertaking, but you can generate the needed REST payload for any action performed in the ACI web interface effortlessly.
+The :ref:`aci_rest <aci_rest_module>` module provides you with direct access to the APIC REST API and enables you to perform any task not already covered by the existing modules. This may seem like a complex undertaking, but you can generate the needed REST payload for any action performed in the ACI web interface effortlessly.
 
 
 Built-in idempotency
 ....................
-Because the APIC REST API is intrinsically idempotent and can report whether a change was made, the :ref:`aci_rest <aci_rest>` module automatically inherits both capabilities and is a first-class solution for automating your ACI infrastructure. As a result, users that require more powerful low-level access to their ACI infrastructure don't have to give up on idempotency and don't have to guess whether a change was performed when using the :ref:`aci_rest <aci_rest>` module.
+Because the APIC REST API is intrinsically idempotent and can report whether a change was made, the :ref:`aci_rest <aci_rest_module>` module automatically inherits both capabilities and is a first-class solution for automating your ACI infrastructure. As a result, users that require more powerful low-level access to their ACI infrastructure don't have to give up on idempotency and don't have to guess whether a change was performed when using the :ref:`aci_rest <aci_rest_module>` module.
 
 
 Using the aci_rest module
 .........................
-The :ref:`aci_rest <aci_rest>` module accepts the native XML and JSON payloads, but additionally accepts inline YAML payload (structured like JSON). The XML payload requires you to use a path ending with ``.xml`` whereas JSON or YAML require the path to end with ``.json``.
+The :ref:`aci_rest <aci_rest_module>` module accepts the native XML and JSON payloads, but additionally accepts inline YAML payload (structured like JSON). The XML payload requires you to use a path ending with ``.xml`` whereas JSON or YAML require the path to end with ``.json``.
 
 When you're making modifications, you can use the POST or DELETE methods, whereas doing just queries require the GET method.
 
@@ -344,7 +375,7 @@ More information
 ................
 Plenty of resources exist to learn about ACI's APIC REST interface, we recommend the links below:
 
-- :ref:`The aci_rest module documentation <aci_rest>`
+- :ref:`The aci_rest module documentation <aci_rest_module>`
 - `APIC REST API Configuration Guide <https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/2-x/rest_cfg/2_1_x/b_Cisco_APIC_REST_API_Configuration_Guide.html>`_ -- Detailed guide on how the APIC REST API is designed and used, incl. many examples
 - `APIC Management Information Model reference <https://developer.cisco.com/docs/apic-mim-ref/>`_ -- Complete reference of the APIC object model
 - `Cisco DevNet Learning Labs about ACI and REST <https://learninglabs.cisco.com/labs/tags/ACI,REST>`_
@@ -408,7 +439,7 @@ APIC error messages
 The following error messages may occur and this section can help you understand what exactly is going on and how to fix/avoid them.
 
     APIC Error 122: unknown managed object class 'polUni'
-        In case you receive this error while you are certain your :ref:`aci_rest <aci_rest>` payload and object classes are seemingly correct, the issue might be that your payload is not in fact correct JSON (e.g. the sent payload is using single quotes, rather than double quotes), and as a result the APIC is not correctly parsing your object classes from the payload. One way to avoid this is by using a YAML or an XML formatted payload, which are easier to construct correctly and modify later.
+        In case you receive this error while you are certain your :ref:`aci_rest <aci_rest_module>` payload and object classes are seemingly correct, the issue might be that your payload is not in fact correct JSON (e.g. the sent payload is using single quotes, rather than double quotes), and as a result the APIC is not correctly parsing your object classes from the payload. One way to avoid this is by using a YAML or an XML formatted payload, which are easier to construct correctly and modify later.
 
 
     APIC Error 400: invalid data at line '1'. Attributes are missing, tag 'attributes' must be specified first, before any other tag
@@ -423,7 +454,7 @@ The following error messages may occur and this section can help you understand 
 
 Known issues
 ------------
-The :ref:`aci_rest <aci_rest>` module is a wrapper around the APIC REST API. As a result any issues related to the APIC will be reflected in the use of this module.
+The :ref:`aci_rest <aci_rest_module>` module is a wrapper around the APIC REST API. As a result any issues related to the APIC will be reflected in the use of this module.
 
 All below issues either have been reported to the vendor, and most can simply be avoided.
 

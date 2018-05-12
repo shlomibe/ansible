@@ -17,8 +17,8 @@ short_description: Manage LLDP interface policies (lldp:IfPol)
 description:
 - Manage LLDP interface policies on Cisco ACI fabrics.
 notes:
-- More information about the internal APIC class B(lldp:IfPol) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(lldp:IfPol) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.4'
@@ -35,14 +35,13 @@ options:
   receive_state:
     description:
     - Enable or disable Receive state.
-    required: yes
+    - The APIC defaults to C(enabled) when unset during creation.
     choices: [ disabled, enabled ]
-    default: enabled
   transmit_state:
     description:
     - Enable or Disable Transmit state.
+    - The APIC defaults to C(enabled) when unset during creation.
     choices: [ disabled, enabled ]
-    default: enabled
   state:
     description:
     - Use C(present) or C(absent) for adding or removing.
@@ -181,8 +180,6 @@ def main():
         receive_state=dict(type='raw'),  # Turn into a boolean in v2.9
         transmit_state=dict(type='raw'),  # Turn into a boolean in v2.9
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

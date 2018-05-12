@@ -18,8 +18,8 @@ description:
 - Manage physical, virtual, bridged, routed or FC domain profiles on Cisco ACI fabrics.
 notes:
 - More information about the internal APIC classes B(phys:DomP),
-  B(vmm:DomP), B(l2ext:DomP), B(l3ext:DomP) and B(fc:DomP) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+  B(vmm:DomP), B(l2ext:DomP), B(l3ext:DomP) and B(fc:DomP) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.5'
@@ -41,8 +41,8 @@ options:
   dscp:
     description:
     - The target Differentiated Service (DSCP) value.
+    - The APIC defaults to C(unspecified) when unset during creation.
     choices: [ AF11, AF12, AF13, AF21, AF22, AF23, AF31, AF32, AF33, AF41, AF42, AF43, CS0, CS1, CS2, CS3, CS4, CS5, CS6, CS7, EF, VA, unspecified ]
-    default: unspecified
     aliases: [ target ]
   encap_mode:
     description:
@@ -66,8 +66,8 @@ options:
   vswitch:
     description:
     - The virtual switch to use for vmm domains.
+    - The APIC defaults to C(default) when unset during creation.
     choices: [ avs, default, dvs, unknown ]
-    default: default
 extends_documentation_fragment: aci
 '''
 

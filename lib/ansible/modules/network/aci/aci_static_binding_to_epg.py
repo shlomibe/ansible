@@ -20,8 +20,8 @@ description:
 notes:
 - The C(tenant), C(ap), C(epg) used must exist before using this module in your playbook.
   The M(aci_tenant), M(aci_ap), M(aci_epg) modules can be used for this.
-- More information about the internal APIC classes B(fv:RsPathAtt) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC classes B(fv:RsPathAtt) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Bruno Calogero (@brunocalogero)
 version_added: '2.5'
@@ -53,23 +53,20 @@ options:
   deploy_immediacy:
     description:
     - The Deployement Immediacy of Static EPG on PC, VPC or Interface.
-    - The APIC defaults the Deployement Immediacy to C(lazy).
+    - The APIC defaults to C(lazy) when unset during creation.
     choices: [ immediate, lazy ]
-    default: lazy
   interface_mode:
     description:
     - Determines how layer 2 tags will be read from and added to frames.
     - Values C(802.1p) and C(native) are identical.
     - Values C(access) and C(untagged) are identical.
     - Values C(regular), C(tagged) and C(trunk) are identical.
-    - The APIC defaults the mode to C(trunk).
+    - The APIC defaults to C(trunk) when unset during creation.
     choices: [ 802.1p, access, native, regular, tagged, trunk, untagged ]
-    default: trunk
     aliases: [ interface_mode_name, mode ]
   interface_type:
     description:
     - The type of interface for the static EPG deployement.
-    - The APIC defaults the C(interface_type) to C(switch_port).
     choices: [ fex, port_channel, switch_port, vpc ]
     default: switch_port
   pod_id:

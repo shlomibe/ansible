@@ -18,8 +18,8 @@ short_description: Manage Fabric interface policy leaf profile interface selecto
 description:
 - Manage Fabric interface policy leaf profile interface selectors on Cisco ACI fabrics.
 notes:
-- More information about the internal APIC classes B(infra:HPortS), B(infra:RsAccBaseGrp) and B(infra:PortBlk) at
-  U(https://developer.cisco.com/media/mim-ref).
+- More information about the internal APIC classes B(infra:HPortS), B(infra:RsAccBaseGrp) and B(infra:PortBlk) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/)
 author:
 - Bruno Calogero (@brunocalogero)
 version_added: '2.5'
@@ -231,6 +231,7 @@ def main():
         'description': dict(typ='str'),
         'leaf_port_blk': dict(type='str', aliases=['leaf_port_blk_name']),
         'leaf_port_blk_description': dict(type='str'),
+        # NOTE: Keyword 'from' is a reserved word in python, so we need it as a string
         'from': dict(type='str', aliases=['fromPort', 'from_port_range']),
         'to': dict(type='str', aliases=['toPort', 'to_port_range']),
         'policy_group': dict(type='str', aliases=['policy_group_name']),

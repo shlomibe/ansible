@@ -20,8 +20,8 @@ description:
 notes:
 - The C(tenant) used must exist before using this module in your playbook.
   The M(aci_tenant) module can be used for this.
-- More information about the internal APIC class B(vz:BrCP) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(vz:BrCP) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Dag Wieers (@dagwieers)
 version_added: '2.4'
@@ -43,9 +43,8 @@ options:
   scope:
     description:
     - The scope of a service contract.
-    - The APIC defaults new Taboo Contracts to C(context).
+    - The APIC defaults to C(context) when unset during creation.
     choices: [ application-profile, context, global, tenant ]
-    default: context
   state:
     description:
     - Use C(present) or C(absent) for adding or removing.
@@ -208,8 +207,6 @@ def main():
         scope=dict(type='str', choices=['application-profile', 'context', 'global', 'tenant']),
         description=dict(type='str', aliases=['descr']),
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

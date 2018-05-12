@@ -48,7 +48,7 @@ from jinja2 import Environment, FileSystemLoader
 from six import iteritems, string_types
 
 from ansible.errors import AnsibleError
-from ansible.module_utils._text import to_bytes
+from ansible.module_utils._text import to_bytes, to_text
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
 from ansible.utils.display import Display
@@ -75,7 +75,9 @@ _ITALIC = re.compile(r"I\(([^)]+)\)")
 _BOLD = re.compile(r"B\(([^)]+)\)")
 _MODULE = re.compile(r"M\(([^)]+)\)")
 _URL = re.compile(r"U\(([^)]+)\)")
+_LINK = re.compile(r"L\(([^)]+),([^)]+)\)")
 _CONST = re.compile(r"C\(([^)]+)\)")
+_RULER = re.compile(r"HORIZONTALLINE")
 
 DEPRECATED = b" (D)"
 
@@ -89,9 +91,11 @@ def rst_ify(text):
     try:
         t = _ITALIC.sub(r"*\1*", text)
         t = _BOLD.sub(r"**\1**", t)
-        t = _MODULE.sub(r":ref:`\1 <\1>`", t)
+        t = _MODULE.sub(r":ref:`\1 <\1_module>`", t)
+        t = _LINK.sub(r"`\1 <\2>`_", t)
         t = _URL.sub(r"\1", t)
         t = _CONST.sub(r"`\1`", t)
+        t = _RULER.sub(r"------------", t)
     except Exception as e:
         raise AnsibleError("Could not process (%s) : %s" % (text, e))
 
@@ -101,14 +105,19 @@ def rst_ify(text):
 def html_ify(text):
     ''' convert symbols like I(this is in italics) to valid HTML '''
 
+    if not isinstance(text, string_types):
+        text = to_text(text)
+
     t = html_escape(text)
     t = _ITALIC.sub(r"<em>\1</em>", t)
     t = _BOLD.sub(r"<b>\1</b>", t)
     t = _MODULE.sub(r"<span class='module'>\1</span>", t)
     t = _URL.sub(r"<a href='\1'>\1</a>", t)
+    t = _LINK.sub(r"<a href='\2'>\1</a>", t)
     t = _CONST.sub(r"<code>\1</code>", t)
+    t = _RULER.sub(r"<hr/>", t)
 
-    return t
+    return t.strip()
 
 
 def rst_fmt(text, fmt):
@@ -551,6 +560,7 @@ These modules are currently shipped with Ansible, but will most likely be shippe
                          'modules': data['modules'],
                          'slug': data['slug'],
                          'module_info': plugin_info,
+                         'plugin_type': plugin_type
                          }
         text = templates['support_list'].render(template_data)
         write_data(text, output_dir, data['output'])

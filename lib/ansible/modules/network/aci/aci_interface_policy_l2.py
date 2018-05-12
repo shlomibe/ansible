@@ -20,8 +20,8 @@ author:
 - Dag Wieers (@dagwieers)
 version_added: '2.4'
 notes:
-- More information about the internal APIC class B(l2:IfPol) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC class B(l2:IfPol) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 options:
   l2_policy:
     description:
@@ -35,18 +35,18 @@ options:
   qinq:
     description:
     - Determines if QinQ is disabled or if the port should be considered a core or edge port.
+    - The APIC defaults to C(disabled) when unset during creation.
     choices: [ core, disabled, edge ]
-    default: disabled
   vepa:
     description:
     - Determines if Virtual Ethernet Port Aggregator is disabled or enabled.
+    - The APIC defaults to C(disabled) when unset during creation.
     choices: [ disabled, enabled ]
-    default: disabled
   vlan_scope:
     description:
     - The scope of the VLAN.
+    - The APIC defaults to C(global) when unset during creation.
     choices: [ global, portlocal ]
-    default: global
   state:
     description:
     - Use C(present) or C(absent) for adding or removing.
@@ -187,8 +187,6 @@ def main():
         qinq=dict(type='str', choices=['core', 'disabled', 'edge']),
         vepa=dict(type='raw'),  # Turn into a boolean in v2.9
         state=dict(type='str', default='present', choices=['absent', 'present', 'query']),
-        method=dict(type='str', choices=['delete', 'get', 'post'], aliases=['action'], removed_in_version='2.6'),  # Deprecated starting from v2.6
-        protocol=dict(type='str', removed_in_version='2.6'),  # Deprecated in v2.6
     )
 
     module = AnsibleModule(

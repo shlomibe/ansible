@@ -169,8 +169,11 @@ class PlayIterator:
             fact_path = self._play.fact_path
 
         setup_block = Block(play=self._play)
+        # Gathering facts with run_once would copy the facts from one host to
+        # the others.
+        setup_block.run_once = False
         setup_task = Task(block=setup_block)
-        setup_task.action = 'setup'
+        setup_task.action = 'gather_facts'
         setup_task.name = 'Gathering Facts'
         setup_task.tags = ['always']
         setup_task.args = {
@@ -298,7 +301,7 @@ class PlayIterator:
 
                     if (gathering == 'implicit' and implied) or \
                        (gathering == 'explicit' and boolean(self._play.gather_facts, strict=False)) or \
-                       (gathering == 'smart' and implied and not (self._variable_manager._fact_cache.get(host.name, {}).get('module_setup', False))):
+                       (gathering == 'smart' and implied and not (self._variable_manager._fact_cache.get(host.name, {}).get('_ansible_facts_gathered', False))):
                         # The setup block is always self._blocks[0], as we inject it
                         # during the play compilation in __init__ above.
                         setup_block = self._blocks[0]
@@ -524,7 +527,7 @@ class PlayIterator:
             if state.tasks_child_state:
                 state.tasks_child_state = self._insert_tasks_into_state(state.tasks_child_state, task_list)
             else:
-                target_block = state._blocks[state.cur_block].copy(exclude_parent=True)
+                target_block = state._blocks[state.cur_block].copy()
                 before = target_block.block[:state.cur_regular_task]
                 after = target_block.block[state.cur_regular_task:]
                 target_block.block = before + task_list + after
@@ -533,7 +536,7 @@ class PlayIterator:
             if state.rescue_child_state:
                 state.rescue_child_state = self._insert_tasks_into_state(state.rescue_child_state, task_list)
             else:
-                target_block = state._blocks[state.cur_block].copy(exclude_parent=True)
+                target_block = state._blocks[state.cur_block].copy()
                 before = target_block.rescue[:state.cur_rescue_task]
                 after = target_block.rescue[state.cur_rescue_task:]
                 target_block.rescue = before + task_list + after
@@ -542,7 +545,7 @@ class PlayIterator:
             if state.always_child_state:
                 state.always_child_state = self._insert_tasks_into_state(state.always_child_state, task_list)
             else:
-                target_block = state._blocks[state.cur_block].copy(exclude_parent=True)
+                target_block = state._blocks[state.cur_block].copy()
                 before = target_block.always[:state.cur_always_task]
                 after = target_block.always[state.cur_always_task:]
                 target_block.always = before + task_list + after

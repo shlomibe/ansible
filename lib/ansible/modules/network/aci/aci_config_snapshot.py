@@ -22,8 +22,8 @@ notes:
 - The APIC does not provide a mechanism for naming the snapshots.
 - 'Snapshot files use the following naming structure: ce_<config export policy name>-<yyyy>-<mm>-<dd>T<hh>:<mm>:<ss>.<mss>+<hh>:<mm>.'
 - 'Snapshot objects use the following naming structure: run-<yyyy>-<mm>-<dd>T<hh>-<mm>-<ss>.'
-- More information about the internal APIC classes B(config:Snapshot) and B(config:ExportP) at
-  U(https://developer.cisco.com/docs/apic-mim-ref/).
+- More information about the internal APIC classes B(config:Snapshot) and B(config:ExportP) from
+  L(the APIC Management Information Model reference,https://developer.cisco.com/docs/apic-mim-ref/).
 author:
 - Jacob McGill (@jmcgill298)
 version_added: '2.4'
@@ -39,21 +39,18 @@ options:
   format:
     description:
     - Sets the config backup to be formatted in JSON or XML.
-    - The APIC defaults new Export Policies to C(json)
+    - The APIC defaults to C(json) when unset.
     choices: [ json, xml ]
-    default: json
   include_secure:
     description:
     - Determines if secure information should be included in the backup.
-    - The APIC defaults new Export Policies to C(yes).
+    - The APIC defaults to C(yes) when unset.
     type: bool
-    default: 'yes'
   max_count:
     description:
     - Determines how many snapshots can exist for the Export Policy before the APIC starts to rollover.
-    - The APIC defaults new Export Policies to C(3).
+    - The APIC defaults to C(3) when unset.
     choices: [ range between 1 and 10 ]
-    default: 3
   snapshot:
     description:
     - The name of the snapshot to delete.
